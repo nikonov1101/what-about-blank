@@ -3,61 +3,71 @@ from threading import Lock
 
 
 class Storage:
-    """Storage provides simple thread-save storage"""
-    mu = Lock()
+    """Storage provides simple thread-save storage singleton"""
+    instance = None
 
     def __init__(self, path):
-        # try to open file and load their content as JSON
-        # if it failed - file is empty, try to rewrite it with
-        # an empty dict
-        try:
-            with open(path, 'r') as f:
-                json.loads(f.read())
-                read_ok = True
-        except:
-            read_ok = False
+        if not Storage.instance:
+            Storage.instance = Storage.__Storage(path)
 
-        if not read_ok:
-            with open(path, 'w') as f:
-                f.write(json.dumps({}))
+    def __getattr__(self, name):
+        return getattr(self.instance, name)
 
-        self._path = path
+    class __Storage:
+        mu = Lock()
 
-    def save_key(self, key, data):
-        """saves JSON-serializable data by given key"""
-        self.mu.acquire()
-        try:
-            current = self._load()
-            current[key] = data
+        def __init__(self, path):
+            # try to open file and load their content as JSON
+            # if it failed - file is empty, try to rewrite it with
+            # an empty dict
+            try:
+                with open(path, 'r') as f:
+                    json.loads(f.read())
+                    read_ok = True
+            except:
+                read_ok = False
 
-            serialized = json.dumps(current)
-            with open(self._path, 'w') as f:
-                f.write(serialized)
+            if not read_ok:
+                with open(path, 'w') as f:
+                    f.write(json.dumps({}))
 
-        finally:
-            self.mu.release()
+            self._path = path
 
-    def load_key(self, key) -> dict:
-        """loads data by given key"""
-        data = self.load_all()
-        try:
-            v = data[key]
-        except KeyError:
-            v = None
+        def save_key(self, key, data):
+            """saves JSON-serializable data by given key"""
+            self.mu.acquire()
+            try:
+                current = self._load()
+                current[key] = data
 
-        return v
+                serialized = json.dumps(current)
+                with open(self._path, 'w') as f:
+                    f.write(serialized)
 
-    def load_all(self) -> dict:
-        """loads all data from storage"""
-        self.mu.acquire()
-        try:
-            data = self._load()
-        finally:
-            self.mu.release()
+            finally:
+                self.mu.release()
 
-        return data
+        def load_key(self, key) -> dict:
+            """loads data by given key"""
+            data = self.load_all()
+            try:
+                v = data[key]
+            except KeyError:
+                v = None
 
-    def _load(self):
-        """reads data from state file, need to be protected by mutex"""
-        with open(self._path, 'r') as f:
-            return json.loads(f.read())
+            return v
+
+        def load_all(self) -> dict:
+            """loads all data from storage"""
+            self.mu.acquire()
+            try:
+                data = self._load()
+            finally:
+                self.mu.release()
+
+            return data
+
+        def _load(self):
+            """reads data from state file, need to be protected by mutex"""
+            with open(self._path, 'r') as f:
+                return json.loads(f.read())

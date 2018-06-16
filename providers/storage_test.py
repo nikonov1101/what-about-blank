@@ -27,3 +27,17 @@ def test_storage(tmpdir):
     assert 'baz' in all
     assert 'user' in all['baz']
     assert all['baz']['user'] == 'name'
+
+
+def test_storage_singleton(tmpdir):
+    tmp = tmpdir.mkdir('test').join('data.json')
+
+    s1 = Storage(tmp)
+    s2 = Storage(tmp)
+
+    s1.save_key('test', {'a': 'b'})
+    v = s2.load_key('test')
+
+    # check that data written into first instance
+    # is available for second instance
+    assert v['a'] == 'b'
