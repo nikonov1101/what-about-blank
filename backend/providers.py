@@ -1,9 +1,11 @@
 import json
 import asyncio
+import threading
 
 from datetime import datetime
 from urllib.parse import urlparse
 from aiohttp import ClientSession
+from backend import config, storage, const
 
 
 class BaseJSONProvider:
@@ -58,24 +60,44 @@ class GithubPullRequestsProvider(BaseJSONProvider):
         return self._wrap(processed)
 
 
-async def main(providers):
-    tasks = [p.collect() for p in providers]
+async def collect_updates(cfg: config.Config, db: storage.Storage):
+    # TODO: this should run forever
+    #
+    # TODO: wanna to look at previous update timestamp
+    # TODO:     and decide starting related provider or not.
+    tasks = [p.collect() for p in init_providers(cfg)]
     for fut in asyncio.as_completed(tasks):
         result = await fut
-        print('returns {}'.format(result))
+        pid = result['id']
+        print('saving "%s" provider data' % pid)
+        db.save_key(pid, result)
 
 
-def get_providers():
-    # TODO(sshaman1101): move this to config
+def init_providers(cfg: config.Config):
     return [
         GithubPullRequestsProvider(
-            prov_id='github_core_pulls',
-            url='https://api.github.com/repos/sonm-io/core/pulls',
+            url=cfg.github_repo_path,
+            prov_id=const.GITHUB_PULLS_PROVIDER_ID,
             headers={'accept': 'application/vnd.github.mercy-preview+json'}
         ),
     ]
 
 
-if __name__ == '__main__':
+def threaded_main(loop: asyncio.AbstractEventLoop, cfg: config.Config, db: storage.Storage):
+    # bing given event loop to thread
+    asyncio.set_event_loop(loop)
+    # run async tasks bound to separate thread
+    loop.run_until_complete(collect_updates(cfg, db))
+
+
+def start_background_updates(cfg: config.Config, db: storage.Storage) -> threading.Thread:
+    """start background processing bound to another thread,
+    returns thread handle to be able to gracefully stop it
+    on application shutdown."""
+
+    # FIXME: need to find proper logging config and replace any `print`s
+    print("starting background processing thread ...")
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(get_providers()))
+    t = threading.Thread(target=threaded_main, args=(loop, cfg, db))
+    t.start()
+    return t

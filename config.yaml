@@ -1,0 +1,6 @@
+backend:
+  storage: data.json
+  endpoint: 127.0.0.1:5000
+
+providers:
+  github_pulls: sonm-io/core
