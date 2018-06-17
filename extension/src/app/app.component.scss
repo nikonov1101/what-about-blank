@@ -1,0 +1,20 @@
+:host {
+  .container-fluid {
+    height: 100%;
+    padding: 0;
+  }
+}
+
+.break {
+  flex-grow: 1;
+}
+
+app-widget {
+  flex: 0;
+  max-height: calc(50% - 7px);
+}
+
+.dashboard {
+  height: calc(100% - 41px - 15px);
+  padding: 0 15px 15px;
+}
