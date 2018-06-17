@@ -1,4 +1,5 @@
 import json
+import logging
 from threading import Lock
 
 
@@ -15,8 +16,11 @@ class Storage:
 
     class __Storage:
         mu = Lock()
+        log = logging.getLogger('storage')
 
         def __init__(self, path):
+            self.log.setLevel(logging.DEBUG)
+
             # try to open file and load their content as JSON
             # if it failed - file is empty, try to rewrite it with
             # an empty dict
@@ -26,6 +30,7 @@ class Storage:
                     read_ok = True
             except:
                 read_ok = False
+                self.log.debug('cannot read storage from %s, try to create new data-file', path, exc_info=1)
 
             if not read_ok:
                 with open(path, 'w') as f:
@@ -43,7 +48,8 @@ class Storage:
                 serialized = json.dumps(current)
                 with open(self._path, 'w') as f:
                     f.write(serialized)
-
+            except:
+                self.log.error('cannot save key "%s" into the storage', key, exc_info=1)
             finally:
                 self.mu.release()
 
