@@ -1,0 +1,18 @@
+<div ngbDropdown #drop="ngbDropdown" [placement]="placement" (mouseleave)="close()">
+  <button #myDropToggle ngbDropdownToggle class="dropdown-item"
+          (mouseover)="open()">
+    <ng-content></ng-content>
+  </button>
+  <div ngbDropdownMenu class="pre-scroll">
+    <ng-container *ngFor="let item of items">
+      <ng-container *ngIf="item.children?.length > 0 else buttonTemplate">
+        <app-bookmark-dropdown [items]="item.children">
+          {{ item.title }}
+        </app-bookmark-dropdown>
+      </ng-container>
+      <ng-template #buttonTemplate>
+        <a [href]="item.url" class="dropdown-item"><img [src]="getUrl(item.url)"> {{ item.title }}</a>
+      </ng-template>
+    </ng-container>
+  </div>
+</div>

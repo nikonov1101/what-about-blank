@@ -1,0 +1,15 @@
+<div class="bookmarks">
+  <ng-container *ngFor="let bookmark of bookmarks">
+    <ng-container *ngIf="bookmark.children?.length > 0 else buttonTemplate">
+      <app-bookmark-dropdown placement="bottom-left" [items]="bookmark.children">
+        <img src="assets/icons/folder.png">{{ bookmark.title }}
+      </app-bookmark-dropdown>
+    </ng-container>
+    <ng-template #buttonTemplate>
+      <div class="dropdown">
+        <a class="dropdown-item" [href]="bookmark.url">
+          <img [src]="getUrl(bookmark.url)" [class.no-margin]="!bookmark.title">&nbsp;{{ bookmark.title }}</a>
+      </div>
+    </ng-template>
+  </ng-container>
+</div>
