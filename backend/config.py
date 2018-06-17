@@ -23,16 +23,18 @@ class Config:
                 errors.append('"storage" parameter is required')
             if not data['backend']['endpoint']:
                 errors.append('"endpoint" parameter is required')
-        except KeyError:
+        except (KeyError, TypeError):
             errors.append('"backend" section is required')
 
         try:
             if not data['providers']['github_pulls']:
                 errors.append('"github_pulls" parameter is required')
-        except KeyError:
+        except (KeyError, TypeError):
             errors.append('"providers" section is required')
 
         return errors
+
+    # todo: add logging level to config
 
     @property
     def storage_path(self):

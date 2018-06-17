@@ -36,10 +36,13 @@ class Storage:
                 with open(path, 'w') as f:
                     f.write(json.dumps({}))
 
+            self.log.debug("successfully create storage instance at %s", path)
             self._path = path
 
         def save_key(self, key, data):
             """saves JSON-serializable data by given key"""
+            self.log.debug("save key %s", key)
+
             self.mu.acquire()
             try:
                 current = self._load()
@@ -55,6 +58,8 @@ class Storage:
 
         def load_key(self, key) -> dict:
             """loads data by given key"""
+            self.log.debug("load key %s", key)
+
             data = self.load_all()
             try:
                 v = data[key]
