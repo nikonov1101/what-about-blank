@@ -66,6 +66,7 @@ async def main(providers):
 
 
 def get_providers():
+    # TODO(sshaman1101): move this to config
     return [
         GithubPullRequestsProvider(
             prov_id='github_core_pulls',

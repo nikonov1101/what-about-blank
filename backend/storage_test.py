@@ -1,4 +1,4 @@
-from providers.storage import Storage
+from backend.storage import Storage
 
 
 def test_storage(tmpdir):
