@@ -1,0 +1,20 @@
+.bookmarks {
+  height: 30px;
+  margin-bottom: 15px;
+  display: flex;
+}
+
+.dropdown-item {
+  padding: 0.15rem 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+img {
+  margin: 0 4px 0 0;
+
+  &.no-margin {
+    margin: 0;
+  }
+}

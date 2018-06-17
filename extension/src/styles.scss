@@ -1,1 +1,12 @@
-/* You can add global styles to this file, and also import other style files */
+@import "assets/styles/shards.css";
+@import "~font-awesome/css/font-awesome.css";
+
+body, html, app-root {
+  height: 100%;
+}
+
+#mv-single {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
