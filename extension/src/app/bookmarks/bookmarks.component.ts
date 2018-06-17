@@ -14,8 +14,12 @@ export class BookmarksComponent implements OnInit {
   }
 
   ngOnInit() {
-    (window as any).chrome.bookmarks.getSubTree('1', bookmarks => {
-      this.bookmarks = bookmarks[0].children;
+    this.loadCachedBookmarks();
+
+    (window as any).chrome.bookmarks.getSubTree('1', bm => {
+      const bookmarks = bm[0].children;
+      this.bookmarks = bookmarks;
+      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
     });
   }
 
@@ -23,4 +27,14 @@ export class BookmarksComponent implements OnInit {
     return this.sanitizer.bypassSecurityTrustUrl('chrome://favicon/' + url);
   }
 
+  private loadCachedBookmarks() {
+    let bookmarks = [];
+    try {
+      bookmarks = <Bookmark[]>JSON.parse(localStorage.getItem('bookmarks'));
+    } catch (e) {
+      console.error('Error while get bookmarks from cache', e);
+    } finally {
+      this.bookmarks = bookmarks;
+    }
+  }
 }
